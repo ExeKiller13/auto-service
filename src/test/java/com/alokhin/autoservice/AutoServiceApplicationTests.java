@@ -1,4 +1,4 @@
-package com.auto.service.autoservice;
+package com.alokhin.autoservice;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
