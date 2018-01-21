@@ -11,7 +11,7 @@ import org.springframework.security.oauth2.provider.token.ResourceServerTokenSer
 
 @Configuration
 @EnableResourceServer
-public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter {
+public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 
     private final ResourceServerTokenServices tokenServices;
 
@@ -19,7 +19,7 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
     private String resourceIds;
 
     @Autowired
-    public ResourceServerConfiguration(ResourceServerTokenServices tokenServices) {
+    public ResourceServerConfig(ResourceServerTokenServices tokenServices) {
         this.tokenServices = tokenServices;
     }
 

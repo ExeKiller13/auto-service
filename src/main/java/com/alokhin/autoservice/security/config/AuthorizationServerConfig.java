@@ -16,7 +16,7 @@ import java.util.Collections;
 
 @Configuration
 @EnableAuthorizationServer
-public class AuthorizationServerConfiguration extends AuthorizationServerConfigurerAdapter {
+public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
 
     @Value ("${security.jwt.client-id}")
     private String clientId;
@@ -43,7 +43,7 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
     private final AuthenticationManager authenticationManager;
 
     @Autowired
-    public AuthorizationServerConfiguration(TokenStore tokenStore, AuthenticationManager authenticationManager, JwtAccessTokenConverter accessTokenConverter) {
+    public AuthorizationServerConfig(TokenStore tokenStore, AuthenticationManager authenticationManager, JwtAccessTokenConverter accessTokenConverter) {
         this.tokenStore = tokenStore;
         this.authenticationManager = authenticationManager;
         this.accessTokenConverter = accessTokenConverter;
