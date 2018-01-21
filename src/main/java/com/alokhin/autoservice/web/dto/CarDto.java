@@ -6,7 +6,7 @@ import lombok.experimental.Tolerate;
 
 @Data
 @Builder
-public class CarDTO {
+public class CarDto {
 
     private Integer id;
     private String name;
@@ -18,6 +18,6 @@ public class CarDTO {
     private String imageUrl;
 
     @Tolerate
-    public CarDTO() {
+    public CarDto() {
     }
 }

@@ -7,10 +7,9 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateCarDTO {
+public class LoginResponseDto {
 
-    private String name;
-    private Integer year;
-    private Integer price;
-    private String description;
+    private AccountDto account;
+    private String message;
+    private String sessionToken;
 }

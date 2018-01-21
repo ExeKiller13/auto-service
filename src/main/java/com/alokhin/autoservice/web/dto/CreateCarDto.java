@@ -7,8 +7,10 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateAccountResultDTO {
+public class CreateCarDto {
 
-    private AccountDTO account;
-    private String message;
+    private String name;
+    private Integer year;
+    private Integer price;
+    private String description;
 }

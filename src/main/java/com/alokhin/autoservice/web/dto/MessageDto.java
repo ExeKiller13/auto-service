@@ -4,14 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AccountDTO {
+public class MessageDto {
 
-    private String login;
-    private List<String> role;
-    private Boolean enabled;
+    private String message;
 }

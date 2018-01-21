@@ -4,11 +4,14 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class LoginRequestDTO {
+public class AccountDto {
 
-    private String username;
-    private String password;
+    private String login;
+    private List<String> role;
+    private Boolean enabled;
 }
