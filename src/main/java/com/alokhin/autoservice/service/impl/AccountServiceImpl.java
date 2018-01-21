@@ -18,6 +18,11 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    public AccountEntity save(AccountEntity entity) {
+        return accountRepository.save(entity);
+    }
+
+    @Override
     public AccountEntity findByLogin(String login) throws AccountNotFoundException {
         AccountEntity entity = accountRepository.findByLogin(login);
         if (entity == null) {
