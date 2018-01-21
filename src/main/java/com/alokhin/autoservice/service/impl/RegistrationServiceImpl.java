@@ -15,11 +15,7 @@ import com.alokhin.autoservice.service.PasswordResetTokenService;
 import com.alokhin.autoservice.service.RegistrationService;
 import com.alokhin.autoservice.service.VerificationTokenService;
 
-import java.util.Date;
-
-import static com.alokhin.autoservice.domain.VerificationTokenResponse.TOKEN_EXPIRED;
-import static com.alokhin.autoservice.domain.VerificationTokenResponse.TOKEN_INVALID;
-import static com.alokhin.autoservice.domain.VerificationTokenResponse.TOKEN_VALID;
+import static com.alokhin.autoservice.domain.VerificationTokenResponse.*;
 import static com.alokhin.autoservice.util.RegistrationUtil.generateToken;
 
 @Service
@@ -85,12 +81,12 @@ public class RegistrationServiceImpl implements RegistrationService {
         }
 
         AccountEntity accountEntity = verificationToken.getAccountEntity();
-        if ((verificationToken.getExpiryDate().getTime() - new Date().getTime()) <= 0) {
+        if (verificationToken.isExpired().booleanValue()) {
             verificationTokenService.delete(verificationToken);
             return TOKEN_EXPIRED;
         }
 
-        accountEntity.setEnabled(true);
+        accountEntity.enable();
         accountService.save(accountEntity);
         return TOKEN_VALID;
     }

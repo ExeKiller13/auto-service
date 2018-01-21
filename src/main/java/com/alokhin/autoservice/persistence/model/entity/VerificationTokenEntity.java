@@ -46,4 +46,8 @@ public class VerificationTokenEntity {
         this.token = newToken;
         this.expiryDate = calculateExpiryDate(EXPIRATION);
     }
+
+    public Boolean isExpired() {
+        return this.expiryDate.getTime() >= new Date().getTime();
+    }
 }

@@ -40,4 +40,8 @@ public class AccountEntity {
     @Tolerate
     public AccountEntity() {
     }
+
+    public void enable() {
+        this.enabled = true;
+    }
 }
