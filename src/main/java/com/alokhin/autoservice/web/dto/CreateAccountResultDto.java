@@ -10,5 +10,5 @@ import lombok.NoArgsConstructor;
 public class CreateAccountResultDto {
 
     private AccountDto account;
-    private String message;
+    private MessageDto messageDto;
 }
