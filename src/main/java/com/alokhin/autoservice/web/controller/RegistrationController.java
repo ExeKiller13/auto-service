@@ -10,8 +10,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import com.alokhin.autoservice.event.OnRegistrationCompleteEvent;
 import com.alokhin.autoservice.exception.AccountAlreadyExistException;
+import com.alokhin.autoservice.exception.VerificationTokenNotFoundException;
 import com.alokhin.autoservice.persistence.model.entity.AccountEntity;
 import com.alokhin.autoservice.service.AccountService;
 import com.alokhin.autoservice.service.EntityConverterService;
@@ -25,6 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import static com.alokhin.autoservice.domain.ErrorResponse.PROCESSING_ERROR;
 import static com.alokhin.autoservice.domain.ErrorResponse.UNKNOWN_ERROR;
+import static com.alokhin.autoservice.domain.VerificationTokenResponse.TOKEN_VALID;
 import static com.alokhin.autoservice.util.UrlUtil.getContextPath;
 
 @Controller
@@ -66,5 +69,13 @@ public class RegistrationController {
             return new ResponseEntity<>(ErrorDto.builder().errorResponse(UNKNOWN_ERROR).messageDto(new MessageDto(e.getMessage())),
                                         HttpStatus.EXPECTATION_FAILED);
         }
+    }
+
+    @RequestMapping (value = "/registrationConfirm", method = RequestMethod.GET)
+    public ResponseEntity<?> confirmRegistration(@RequestParam ("token") String token) throws VerificationTokenNotFoundException {
+        if (TOKEN_VALID.equals(registrationService.validateVerificationToken(token))) {
+            return new ResponseEntity<>(HttpStatus.OK); // successfuly confirmed
+        }
+        return new ResponseEntity<>(HttpStatus.EXPECTATION_FAILED);
     }
 }
