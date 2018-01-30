@@ -13,15 +13,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import com.alokhin.autoservice.event.OnRegistrationCompleteEvent;
 import com.alokhin.autoservice.exception.AccountAlreadyExistException;
+import com.alokhin.autoservice.exception.AccountNotFoundException;
 import com.alokhin.autoservice.exception.VerificationTokenNotFoundException;
 import com.alokhin.autoservice.persistence.model.entity.AccountEntity;
 import com.alokhin.autoservice.service.AccountService;
 import com.alokhin.autoservice.service.EntityConverterService;
 import com.alokhin.autoservice.service.RegistrationService;
-import com.alokhin.autoservice.web.dto.CreateAccountDto;
-import com.alokhin.autoservice.web.dto.CreateAccountResultDto;
-import com.alokhin.autoservice.web.dto.ErrorDto;
-import com.alokhin.autoservice.web.dto.MessageDto;
+import com.alokhin.autoservice.web.dto.*;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -77,5 +75,22 @@ public class RegistrationController {
             return new ResponseEntity<>(HttpStatus.OK); // successfuly confirmed
         }
         return new ResponseEntity<>(HttpStatus.EXPECTATION_FAILED);
+    }
+
+    @RequestMapping (value = "/user/resendToken", method = RequestMethod.POST)
+    public ResponseEntity<?> resendConfirmationToken(HttpServletRequest request, @RequestBody EmailDto email) {
+        try {
+            AccountEntity registered = accountService.findByLogin(email.getEmail());
+            eventPublisher.publishEvent(new OnRegistrationCompleteEvent(registered, getContextPath(request)));
+            return new ResponseEntity<>(new MessageDto("Please confirm your account"), HttpStatus.OK);
+        } catch (AccountNotFoundException a) {
+            logger.error("Failed to resend confirmation token", a);
+            return new ResponseEntity<>(ErrorDto.builder().errorResponse(PROCESSING_ERROR).messageDto(new MessageDto(a.getMessage())),
+                                        HttpStatus.EXPECTATION_FAILED);
+        } catch (Exception e) {
+            logger.error("Failed to resend confirmation token", e);
+            return new ResponseEntity<>(ErrorDto.builder().errorResponse(UNKNOWN_ERROR).messageDto(new MessageDto(e.getMessage())),
+                                        HttpStatus.EXPECTATION_FAILED);
+        }
     }
 }
