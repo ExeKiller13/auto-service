@@ -52,7 +52,7 @@ public class RegistrationServiceImpl implements RegistrationService {
             logger.warn("The verification token for username {} doesn't exists. Creating new token", accountEntity.getLogin());
             verificationTokenEntity = createVerificationToken(accountEntity);
         }
-        return verificationTokenEntity;
+        return verificationTokenService.save(verificationTokenEntity);
     }
 
     @Override
@@ -70,7 +70,7 @@ public class RegistrationServiceImpl implements RegistrationService {
             logger.warn("The password reset token for username {} doesn't exists. Creating new token", accountEntity.getLogin());
             passwordResetTokenEntity = createPasswordResetToken(accountEntity);
         }
-        return passwordResetTokenEntity;
+        return passwordResetTokenService.save(passwordResetTokenEntity);
     }
 
     @Override
