@@ -3,17 +3,16 @@ package com.alokhin.autoservice.service.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import com.alokhin.autoservice.domain.VerificationTokenResponse;
+import com.alokhin.autoservice.exception.AccountNotActivatedException;
 import com.alokhin.autoservice.exception.PasswordResetTokenNotFoundException;
 import com.alokhin.autoservice.exception.VerificationTokenNotFoundException;
 import com.alokhin.autoservice.persistence.model.entity.AccountEntity;
 import com.alokhin.autoservice.persistence.model.entity.PasswordResetTokenEntity;
 import com.alokhin.autoservice.persistence.model.entity.VerificationTokenEntity;
-import com.alokhin.autoservice.service.AccountService;
-import com.alokhin.autoservice.service.PasswordResetTokenService;
-import com.alokhin.autoservice.service.RegistrationService;
-import com.alokhin.autoservice.service.VerificationTokenService;
+import com.alokhin.autoservice.service.*;
 
 import static com.alokhin.autoservice.domain.VerificationTokenResponse.*;
 import static com.alokhin.autoservice.util.RegistrationUtil.generateToken;
@@ -23,18 +22,24 @@ public class RegistrationServiceImpl implements RegistrationService {
 
     private static final Logger logger = LoggerFactory.getLogger(RegistrationServiceImpl.class);
 
+    @Value ("${support.email}")
+    private String from;
+
     private final AccountService accountService;
 
     private final VerificationTokenService verificationTokenService;
 
     private final PasswordResetTokenService passwordResetTokenService;
 
+    private final MailService mailService;
+
     @Autowired
     public RegistrationServiceImpl(PasswordResetTokenService passwordResetTokenService, VerificationTokenService verificationTokenService,
-                                   AccountService accountService) {
+                                   AccountService accountService, MailService mailService) {
         this.passwordResetTokenService = passwordResetTokenService;
         this.verificationTokenService = verificationTokenService;
         this.accountService = accountService;
+        this.mailService = mailService;
     }
 
     @Override
@@ -71,6 +76,17 @@ public class RegistrationServiceImpl implements RegistrationService {
             passwordResetTokenEntity = createPasswordResetToken(accountEntity);
         }
         return passwordResetTokenService.save(passwordResetTokenEntity);
+    }
+
+    @Override
+    public void forgotPassword(AccountEntity accountEntity, String path) throws AccountNotActivatedException {
+        if (!accountEntity.getEnabled().booleanValue()) {
+            throw new AccountNotActivatedException(String.format("Account with username %s isn't activated", accountEntity.getLogin()));
+        }
+        PasswordResetTokenEntity token = updatePasswordResetToken(accountEntity);
+        String url = path + "/user/changepassword?email=" + accountEntity.getLogin() + "&token=" + token.getToken();
+        mailService.sendMailMessage(from, accountEntity.getLogin(), "Reset Password",
+                                    String.format("Please reset password following by link: \r\n %s", url));
     }
 
     @Override

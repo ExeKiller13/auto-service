@@ -12,10 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import com.alokhin.autoservice.event.OnRegistrationCompleteEvent;
-import com.alokhin.autoservice.exception.AccountAlreadyActivatedException;
-import com.alokhin.autoservice.exception.AccountAlreadyExistException;
-import com.alokhin.autoservice.exception.AccountNotFoundException;
-import com.alokhin.autoservice.exception.VerificationTokenNotFoundException;
+import com.alokhin.autoservice.exception.*;
 import com.alokhin.autoservice.persistence.model.entity.AccountEntity;
 import com.alokhin.autoservice.service.AccountService;
 import com.alokhin.autoservice.service.EntityConverterService;
@@ -97,6 +94,27 @@ public class RegistrationController {
                                         HttpStatus.EXPECTATION_FAILED);
         } catch (Exception e) {
             logger.error("Failed to resend confirmation token", e);
+            return new ResponseEntity<>(ErrorDto.builder().errorResponse(UNKNOWN_ERROR).messageDto(new MessageDto(e.getMessage())),
+                                        HttpStatus.EXPECTATION_FAILED);
+        }
+    }
+
+    @RequestMapping (value = "/user/forgotPassword", method = RequestMethod.POST)
+    public ResponseEntity<?> forgotPassword(HttpServletRequest request, @RequestBody EmailDto email) {
+        try {
+            AccountEntity accountEntity = accountService.findByLogin(email.getEmail());
+            registrationService.forgotPassword(accountEntity, getContextPath(request));
+            return new ResponseEntity<>(new MessageDto("Please follow by link to change the password"), HttpStatus.OK);
+        } catch (AccountNotFoundException a) {
+            logger.error("Failed to change password. Account not found", a);
+            return new ResponseEntity<>(ErrorDto.builder().errorResponse(PROCESSING_ERROR).messageDto(new MessageDto(a.getMessage())),
+                                        HttpStatus.EXPECTATION_FAILED);
+        } catch (AccountNotActivatedException a) {
+            logger.error("Failed to change password. Account isn't activated", a);
+            return new ResponseEntity<>(ErrorDto.builder().errorResponse(PROCESSING_ERROR).messageDto(new MessageDto(a.getMessage())),
+                                        HttpStatus.EXPECTATION_FAILED);
+        } catch (Exception e) {
+            logger.error("Failed to change password", e);
             return new ResponseEntity<>(ErrorDto.builder().errorResponse(UNKNOWN_ERROR).messageDto(new MessageDto(e.getMessage())),
                                         HttpStatus.EXPECTATION_FAILED);
         }
