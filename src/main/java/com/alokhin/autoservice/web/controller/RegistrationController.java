@@ -70,7 +70,7 @@ public class RegistrationController {
         }
     }
 
-    @RequestMapping (value = "/registrationConfirm", method = RequestMethod.GET)
+    @RequestMapping (value = "/confirm", method = RequestMethod.GET)
     public ResponseEntity<?> confirmRegistration(@RequestParam ("token") String token) throws VerificationTokenNotFoundException {
         if (TOKEN_VALID.equals(registrationService.validateVerificationToken(token))) {
             return new ResponseEntity<>(HttpStatus.OK); // successfuly confirmed
