@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import com.alokhin.autoservice.event.OnRegistrationCompleteEvent;
+import com.alokhin.autoservice.exception.AccountAlreadyActivatedException;
 import com.alokhin.autoservice.exception.AccountAlreadyExistException;
 import com.alokhin.autoservice.exception.AccountNotFoundException;
 import com.alokhin.autoservice.exception.VerificationTokenNotFoundException;
@@ -81,10 +82,17 @@ public class RegistrationController {
     public ResponseEntity<?> resendConfirmationToken(HttpServletRequest request, @RequestBody EmailDto email) {
         try {
             AccountEntity registered = accountService.findByLogin(email.getEmail());
+            if (registered.getEnabled().booleanValue()) {
+                throw new AccountAlreadyActivatedException(String.format("Account with username %s is already activated", email.getEmail()));
+            }
             eventPublisher.publishEvent(new OnRegistrationCompleteEvent(registered, getContextPath(request)));
             return new ResponseEntity<>(new MessageDto("Please confirm your account"), HttpStatus.OK);
         } catch (AccountNotFoundException a) {
-            logger.error("Failed to resend confirmation token", a);
+            logger.error("Failed to resend confirmation token. Account not found", a);
+            return new ResponseEntity<>(ErrorDto.builder().errorResponse(PROCESSING_ERROR).messageDto(new MessageDto(a.getMessage())),
+                                        HttpStatus.EXPECTATION_FAILED);
+        } catch (AccountAlreadyActivatedException a) {
+            logger.error("Failed to resend confirmation token. Account already activated", a);
             return new ResponseEntity<>(ErrorDto.builder().errorResponse(PROCESSING_ERROR).messageDto(new MessageDto(a.getMessage())),
                                         HttpStatus.EXPECTATION_FAILED);
         } catch (Exception e) {
