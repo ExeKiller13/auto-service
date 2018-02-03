@@ -48,6 +48,6 @@ public class VerificationTokenEntity {
     }
 
     public Boolean isExpired() {
-        return this.expiryDate.getTime() >= new Date().getTime();
+        return this.expiryDate.getTime() <= new Date().getTime();
     }
 }
