@@ -121,7 +121,7 @@ public class RegistrationServiceImpl implements RegistrationService {
     public VerificationTokenResponse validatePasswordResetToken(AccountEntity accountEntity, String token) {
         try {
             PasswordResetTokenEntity passwordResetToken = passwordResetTokenService.findByToken(token);
-            if (accountEntity.equals(passwordResetToken.getAccountEntity())) {
+            if (!accountEntity.equals(passwordResetToken.getAccountEntity())) {
                 return TOKEN_INVALID;
             }
             if (passwordResetToken.isExpired().booleanValue()) {
