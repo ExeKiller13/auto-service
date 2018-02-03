@@ -69,8 +69,14 @@ public class RegistrationController {
 
     @RequestMapping (value = "/confirm", method = RequestMethod.GET)
     public ResponseEntity<?> confirmRegistration(@RequestParam ("token") String token) throws VerificationTokenNotFoundException {
-        if (TOKEN_VALID.equals(registrationService.validateVerificationToken(token))) {
-            return new ResponseEntity<>(HttpStatus.OK); // successfuly confirmed
+        switch (registrationService.validateVerificationToken(token)) {
+            case TOKEN_VALID:
+                return new ResponseEntity<>(new MessageDto("Account successfuly confirmed"), HttpStatus.OK); // successfuly confirmed
+            case TOKEN_INVALID:
+                return new ResponseEntity<>(new MessageDto("Invalid token"), HttpStatus.EXPECTATION_FAILED);
+            case TOKEN_EXPIRED:
+                return new ResponseEntity<>(new MessageDto("Token expired"), HttpStatus.EXPECTATION_FAILED);
+
         }
         return new ResponseEntity<>(HttpStatus.EXPECTATION_FAILED);
     }
