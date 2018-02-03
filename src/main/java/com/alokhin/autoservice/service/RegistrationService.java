@@ -3,7 +3,6 @@ package com.alokhin.autoservice.service;
 import com.alokhin.autoservice.domain.VerificationTokenResponse;
 import com.alokhin.autoservice.exception.AccountAlreadyActivatedException;
 import com.alokhin.autoservice.exception.AccountNotActivatedException;
-import com.alokhin.autoservice.exception.VerificationTokenNotFoundException;
 import com.alokhin.autoservice.persistence.model.entity.AccountEntity;
 import com.alokhin.autoservice.persistence.model.entity.PasswordResetTokenEntity;
 import com.alokhin.autoservice.persistence.model.entity.VerificationTokenEntity;
@@ -20,7 +19,7 @@ public interface RegistrationService {
 
     void forgotPassword(AccountEntity accountEntity, String path) throws AccountNotActivatedException;
 
-    VerificationTokenResponse validateVerificationToken(String token) throws VerificationTokenNotFoundException, AccountAlreadyActivatedException;
+    VerificationTokenResponse validateVerificationToken(String token) throws AccountAlreadyActivatedException;
 
     VerificationTokenResponse validatePasswordResetToken(AccountEntity accountEntity, String token);
 }
