@@ -35,6 +35,11 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    public void delete(AccountEntity entity) {
+        accountRepository.delete(entity);
+    }
+
+    @Override
     public AccountEntity findByLogin(String login) throws AccountNotFoundException {
         AccountEntity entity = accountRepository.findByLogin(login);
         if (entity == null) {

@@ -9,6 +9,8 @@ public interface AccountService {
 
     AccountEntity save(AccountEntity entity);
 
+    void delete(AccountEntity entity);
+
     AccountEntity findByLogin(String login) throws AccountNotFoundException;
 
     AccountEntity createAccount(CreateAccountDto createAccountDto) throws AccountAlreadyExistException;
