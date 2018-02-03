@@ -6,11 +6,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import com.alokhin.autoservice.domain.VerificationTokenResponse;
 import com.alokhin.autoservice.event.OnRegistrationCompleteEvent;
 import com.alokhin.autoservice.exception.*;
 import com.alokhin.autoservice.persistence.model.entity.AccountEntity;
@@ -23,6 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import static com.alokhin.autoservice.domain.ErrorResponse.PROCESSING_ERROR;
 import static com.alokhin.autoservice.domain.ErrorResponse.UNKNOWN_ERROR;
+import static com.alokhin.autoservice.domain.VerificationTokenResponse.TOKEN_VALID;
 import static com.alokhin.autoservice.util.UrlUtil.getContextPath;
 
 @Controller
@@ -78,10 +81,6 @@ public class RegistrationController {
                     return new ResponseEntity<>(new MessageDto("Token expired"), HttpStatus.EXPECTATION_FAILED);
             }
             return new ResponseEntity<>(HttpStatus.EXPECTATION_FAILED);
-        } catch (VerificationTokenNotFoundException e) {
-            logger.error("Failed to confirm account", e);
-            return new ResponseEntity<>(ErrorDto.builder().errorResponse(PROCESSING_ERROR).messageDto(new MessageDto("Token not found")),
-                                        HttpStatus.EXPECTATION_FAILED);
         } catch (AccountAlreadyActivatedException e) {
             logger.error("Failed to confirm account", e);
             return new ResponseEntity<>(ErrorDto.builder().errorResponse(UNKNOWN_ERROR).messageDto(new MessageDto("Account already activated")),
@@ -132,5 +131,27 @@ public class RegistrationController {
             return new ResponseEntity<>(ErrorDto.builder().errorResponse(UNKNOWN_ERROR).messageDto(new MessageDto(e.getMessage())),
                                         HttpStatus.EXPECTATION_FAILED);
         }
+    }
+
+    @RequestMapping (value = "/user/changePassword", method = RequestMethod.GET)
+    public String showChangePasswordPage(@RequestParam ("email") String email, @RequestParam ("token") String token) {
+        try {
+            AccountEntity accountEntity = accountService.findByLogin(email);
+            VerificationTokenResponse response = registrationService.validatePasswordResetToken(accountEntity, token);
+            if (response != TOKEN_VALID) {
+                return "error";
+            }
+            return "updatePassword";
+        } catch (AccountNotFoundException e) {
+            logger.error("Failed to change password. Account not found", e);
+            return "error";
+        }
+    }
+
+    @RequestMapping (value = "/user/savePassword", method = RequestMethod.POST)
+    public ResponseEntity<?> updatePassword(@RequestParam ("password") String password) {
+        AccountEntity user = (AccountEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        accountService.changeAccountPassword(user, password.toLowerCase());
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }
