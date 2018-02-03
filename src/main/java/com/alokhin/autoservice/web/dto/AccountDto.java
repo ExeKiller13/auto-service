@@ -12,6 +12,6 @@ import java.util.List;
 public class AccountDto {
 
     private String login;
-    private List<String> role;
+    private List<RoleDto> roles;
     private Boolean enabled;
 }
