@@ -6,4 +6,6 @@ import com.alokhin.autoservice.persistence.model.entity.RoleEntity;
 
 @Repository
 public interface RoleRepository extends CrudRepository<RoleEntity, Long> {
+
+    RoleEntity findByName(String name);
 }
