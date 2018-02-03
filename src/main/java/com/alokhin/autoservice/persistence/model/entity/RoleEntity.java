@@ -2,6 +2,7 @@ package com.alokhin.autoservice.persistence.model.entity;
 
 import lombok.Builder;
 import lombok.Data;
+import lombok.experimental.Tolerate;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -19,4 +20,8 @@ public class RoleEntity {
     private String name;
 
     private String description;
+
+    @Tolerate
+    public RoleEntity() {
+    }
 }
