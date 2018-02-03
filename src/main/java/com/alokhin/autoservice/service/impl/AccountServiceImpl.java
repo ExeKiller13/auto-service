@@ -48,10 +48,10 @@ public class AccountServiceImpl implements AccountService {
         if (accountRepository.findByLogin(createAccountDto.getEmail()) != null) {
             throw new AccountAlreadyExistException(String.format("The account with username %s already exist", createAccountDto.getEmail()));
         }
-        RoleEntity accountRole = null;
+        RoleEntity accountRole;
         try {
             accountRole = roleService.findByName(USER_ROLE);
-        } catch (RoleNotFoundException e) {
+        } catch (RoleNotFoundException ignored) {
             accountRole = RoleEntity.builder().name(USER_ROLE).build();
             roleService.save(accountRole);
         }
