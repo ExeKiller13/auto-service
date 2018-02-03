@@ -118,7 +118,7 @@ public class RegistrationServiceImpl implements RegistrationService {
     }
 
     @Override
-    public VerificationTokenResponse validatePasswordResetToken(AccountEntity accountEntity, String token) throws PasswordResetTokenNotFoundException {
+    public VerificationTokenResponse validatePasswordResetToken(AccountEntity accountEntity, String token) {
         try {
             PasswordResetTokenEntity passwordResetToken = passwordResetTokenService.findByToken(token);
             if (accountEntity.equals(passwordResetToken.getAccountEntity())) {
