@@ -6,10 +6,14 @@ import org.springframework.stereotype.Service;
 import com.alokhin.autoservice.exception.AccountNotFoundException;
 import com.alokhin.autoservice.persistence.model.entity.AccountEntity;
 import com.alokhin.autoservice.persistence.model.entity.CarEntity;
+import com.alokhin.autoservice.persistence.model.entity.RoleEntity;
 import com.alokhin.autoservice.service.AccountService;
 import com.alokhin.autoservice.service.EntityConverterService;
 import com.alokhin.autoservice.web.dto.AccountDto;
 import com.alokhin.autoservice.web.dto.CarDto;
+import com.alokhin.autoservice.web.dto.RoleDto;
+
+import java.util.stream.Collectors;
 
 @Service
 public class EntityConverterServiceImpl implements EntityConverterService {
@@ -25,14 +29,27 @@ public class EntityConverterServiceImpl implements EntityConverterService {
     }
 
     @Override
+    public RoleEntity toEntity(RoleDto dto) {
+        return mapper.map(dto, RoleEntity.class);
+    }
+
+    @Override
+    public RoleDto toDto(RoleEntity entity) {
+        return mapper.map(entity, RoleDto.class);
+    }
+
+    @Override
     public AccountEntity toEntity(AccountDto dto) {
-        return mapper.map(dto, AccountEntity.class);
+        AccountEntity entity = mapper.map(dto, AccountEntity.class);
+        entity.setRoles(dto.getRoles().stream().map(this::toEntity).collect(Collectors.toList()));
+        return entity;
     }
 
     @Override
     public AccountDto toDto(AccountEntity entity) {
-        return mapper.map(entity, AccountDto.class);
-
+        AccountDto dto = mapper.map(entity, AccountDto.class);
+        dto.setRoles(entity.getRoles().stream().map(this::toDto).collect(Collectors.toList()));
+        return dto;
     }
 
     @Override
