@@ -15,5 +15,5 @@ public interface AccountService {
 
     AccountEntity createAccount(CreateAccountDto createAccountDto) throws AccountAlreadyExistException;
 
-    AccountEntity changeAccountPassword(String login, String newPassword) throws AccountNotFoundException;
+    AccountEntity changeAccountPassword(AccountEntity entity, String newPassword);
 }

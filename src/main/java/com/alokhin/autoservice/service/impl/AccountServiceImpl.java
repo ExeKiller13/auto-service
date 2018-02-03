@@ -67,8 +67,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public AccountEntity changeAccountPassword(String login, String newPassword) throws AccountNotFoundException {
-        AccountEntity entity = findByLogin(login);
+    public AccountEntity changeAccountPassword(AccountEntity entity, String newPassword) {
         entity.setPassword(newPassword);
         return save(entity);
     }
