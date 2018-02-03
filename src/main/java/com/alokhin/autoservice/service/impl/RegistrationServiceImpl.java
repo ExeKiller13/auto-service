@@ -4,6 +4,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import com.alokhin.autoservice.domain.VerificationTokenResponse;
 import com.alokhin.autoservice.exception.AccountAlreadyActivatedException;
@@ -14,6 +18,8 @@ import com.alokhin.autoservice.persistence.model.entity.AccountEntity;
 import com.alokhin.autoservice.persistence.model.entity.PasswordResetTokenEntity;
 import com.alokhin.autoservice.persistence.model.entity.VerificationTokenEntity;
 import com.alokhin.autoservice.service.*;
+
+import java.util.Collections;
 
 import static com.alokhin.autoservice.domain.VerificationTokenResponse.*;
 import static com.alokhin.autoservice.util.RegistrationUtil.generateToken;
@@ -91,24 +97,42 @@ public class RegistrationServiceImpl implements RegistrationService {
     }
 
     @Override
-    public VerificationTokenResponse validateVerificationToken(String token) throws VerificationTokenNotFoundException, AccountAlreadyActivatedException {
-        VerificationTokenEntity verificationToken = verificationTokenService.findByToken(token);
-        if (verificationToken == null) {
+    public VerificationTokenResponse validateVerificationToken(String token) throws AccountAlreadyActivatedException {
+        try {
+            VerificationTokenEntity verificationToken = verificationTokenService.findByToken(token);
+            AccountEntity accountEntity = verificationToken.getAccountEntity();
+            if (accountEntity.getEnabled().booleanValue()) {
+                throw new AccountAlreadyActivatedException(String.format("Account with username %s is already activated", accountEntity.getLogin()));
+            }
+            if (verificationToken.isExpired().booleanValue()) {
+                accountService.delete(accountEntity);
+                verificationTokenService.delete(verificationToken);
+                return TOKEN_EXPIRED;
+            }
+            accountEntity.enable();
+            accountService.save(accountEntity);
+            return TOKEN_VALID;
+        } catch (VerificationTokenNotFoundException ignored) {
             return TOKEN_INVALID;
         }
+    }
 
-        AccountEntity accountEntity = verificationToken.getAccountEntity();
-        if (accountEntity.getEnabled().booleanValue()) {
-            throw new AccountAlreadyActivatedException(String.format("Account with username %s is already activated", accountEntity.getLogin()));
+    @Override
+    public VerificationTokenResponse validatePasswordResetToken(AccountEntity accountEntity, String token) throws PasswordResetTokenNotFoundException {
+        try {
+            PasswordResetTokenEntity passwordResetToken = passwordResetTokenService.findByToken(token);
+            if (accountEntity.equals(passwordResetToken.getAccountEntity())) {
+                return TOKEN_INVALID;
+            }
+            if (passwordResetToken.isExpired().booleanValue()) {
+                return TOKEN_EXPIRED;
+            }
+            Authentication auth = new UsernamePasswordAuthenticationToken(accountEntity, null,
+                                                                          Collections.singletonList(new SimpleGrantedAuthority("CHANGE_PASSWORD_PRIVILEGE")));
+            SecurityContextHolder.getContext().setAuthentication(auth);
+            return TOKEN_VALID;
+        } catch (PasswordResetTokenNotFoundException ignored) {
+            return TOKEN_INVALID;
         }
-        if (verificationToken.isExpired().booleanValue()) {
-            accountService.delete(accountEntity);
-            verificationTokenService.delete(verificationToken);
-            return TOKEN_EXPIRED;
-        }
-
-        accountEntity.enable();
-        accountService.save(accountEntity);
-        return TOKEN_VALID;
     }
 }
