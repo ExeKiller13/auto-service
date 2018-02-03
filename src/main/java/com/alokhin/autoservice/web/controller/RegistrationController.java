@@ -23,7 +23,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import static com.alokhin.autoservice.domain.ErrorResponse.PROCESSING_ERROR;
 import static com.alokhin.autoservice.domain.ErrorResponse.UNKNOWN_ERROR;
-import static com.alokhin.autoservice.domain.VerificationTokenResponse.TOKEN_VALID;
 import static com.alokhin.autoservice.util.UrlUtil.getContextPath;
 
 @Controller
@@ -68,17 +67,26 @@ public class RegistrationController {
     }
 
     @RequestMapping (value = "/confirm", method = RequestMethod.GET)
-    public ResponseEntity<?> confirmRegistration(@RequestParam ("token") String token) throws VerificationTokenNotFoundException {
-        switch (registrationService.validateVerificationToken(token)) {
-            case TOKEN_VALID:
-                return new ResponseEntity<>(new MessageDto("Account successfuly confirmed"), HttpStatus.OK); // successfuly confirmed
-            case TOKEN_INVALID:
-                return new ResponseEntity<>(new MessageDto("Invalid token"), HttpStatus.EXPECTATION_FAILED);
-            case TOKEN_EXPIRED:
-                return new ResponseEntity<>(new MessageDto("Token expired"), HttpStatus.EXPECTATION_FAILED);
-
+    public ResponseEntity<?> confirmRegistration(@RequestParam ("token") String token) {
+        try {
+            switch (registrationService.validateVerificationToken(token)) {
+                case TOKEN_VALID:
+                    return new ResponseEntity<>(new MessageDto("Account successfuly confirmed"), HttpStatus.OK); // successfuly confirmed
+                case TOKEN_INVALID:
+                    return new ResponseEntity<>(new MessageDto("Invalid token"), HttpStatus.EXPECTATION_FAILED);
+                case TOKEN_EXPIRED:
+                    return new ResponseEntity<>(new MessageDto("Token expired"), HttpStatus.EXPECTATION_FAILED);
+            }
+            return new ResponseEntity<>(HttpStatus.EXPECTATION_FAILED);
+        } catch (VerificationTokenNotFoundException e) {
+            logger.error("Failed to confirm account", e);
+            return new ResponseEntity<>(ErrorDto.builder().errorResponse(PROCESSING_ERROR).messageDto(new MessageDto("Token not found")),
+                                        HttpStatus.EXPECTATION_FAILED);
+        } catch (AccountAlreadyActivatedException e) {
+            logger.error("Failed to confirm account", e);
+            return new ResponseEntity<>(ErrorDto.builder().errorResponse(UNKNOWN_ERROR).messageDto(new MessageDto("Account already activated")),
+                                        HttpStatus.EXPECTATION_FAILED);
         }
-        return new ResponseEntity<>(HttpStatus.EXPECTATION_FAILED);
     }
 
     @RequestMapping (value = "/user/resendToken", method = RequestMethod.POST)
