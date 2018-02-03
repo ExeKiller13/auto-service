@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import com.alokhin.autoservice.domain.VerificationTokenResponse;
+import com.alokhin.autoservice.exception.AccountAlreadyActivatedException;
 import com.alokhin.autoservice.exception.AccountNotActivatedException;
 import com.alokhin.autoservice.exception.PasswordResetTokenNotFoundException;
 import com.alokhin.autoservice.exception.VerificationTokenNotFoundException;
@@ -90,14 +91,18 @@ public class RegistrationServiceImpl implements RegistrationService {
     }
 
     @Override
-    public VerificationTokenResponse validateVerificationToken(String token) throws VerificationTokenNotFoundException {
+    public VerificationTokenResponse validateVerificationToken(String token) throws VerificationTokenNotFoundException, AccountAlreadyActivatedException {
         VerificationTokenEntity verificationToken = verificationTokenService.findByToken(token);
         if (verificationToken == null) {
             return TOKEN_INVALID;
         }
 
         AccountEntity accountEntity = verificationToken.getAccountEntity();
+        if (accountEntity.getEnabled().booleanValue()) {
+            throw new AccountAlreadyActivatedException(String.format("Account with username %s is already activated", accountEntity.getLogin()));
+        }
         if (verificationToken.isExpired().booleanValue()) {
+            accountService.delete(accountEntity);
             verificationTokenService.delete(verificationToken);
             return TOKEN_EXPIRED;
         }
