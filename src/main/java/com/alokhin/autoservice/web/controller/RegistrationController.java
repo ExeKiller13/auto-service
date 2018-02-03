@@ -151,7 +151,7 @@ public class RegistrationController {
     @RequestMapping (value = "/user/savePassword", method = RequestMethod.POST)
     public ResponseEntity<?> updatePassword(@RequestParam ("password") String password) {
         AccountEntity user = (AccountEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        accountService.changeAccountPassword(user, password.toLowerCase());
+        accountService.changeAccountPassword(user, password);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }
