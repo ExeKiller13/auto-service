@@ -4,10 +4,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.alokhin.autoservice.exception.AccountAlreadyExistException;
 import com.alokhin.autoservice.exception.AccountNotFoundException;
+import com.alokhin.autoservice.exception.RoleNotFoundException;
 import com.alokhin.autoservice.persistence.dao.AccountRepository;
 import com.alokhin.autoservice.persistence.model.entity.AccountEntity;
 import com.alokhin.autoservice.persistence.model.entity.RoleEntity;
 import com.alokhin.autoservice.service.AccountService;
+import com.alokhin.autoservice.service.RoleService;
 import com.alokhin.autoservice.web.dto.CreateAccountDto;
 
 import java.util.Collections;
@@ -15,11 +17,16 @@ import java.util.Collections;
 @Service
 public class AccountServiceImpl implements AccountService {
 
+    private final static String USER_ROLE = "USER";
+
+    private final RoleService roleService;
+
     private final AccountRepository accountRepository;
 
     @Autowired
-    public AccountServiceImpl(AccountRepository accountRepository) {
+    public AccountServiceImpl(AccountRepository accountRepository, RoleService roleService) {
         this.accountRepository = accountRepository;
+        this.roleService = roleService;
     }
 
     @Override
@@ -41,10 +48,16 @@ public class AccountServiceImpl implements AccountService {
         if (accountRepository.findByLogin(createAccountDto.getEmail()) != null) {
             throw new AccountAlreadyExistException(String.format("The account with username %s already exist", createAccountDto.getEmail()));
         }
-        RoleEntity userRole = RoleEntity.builder().name("USER").build();
+        RoleEntity accountRole = null;
+        try {
+            accountRole = roleService.findByName(USER_ROLE);
+        } catch (RoleNotFoundException e) {
+            accountRole = RoleEntity.builder().name(USER_ROLE).build();
+            roleService.save(accountRole);
+        }
         AccountEntity newAccount = AccountEntity.builder().login(createAccountDto.getEmail())
                                                 .password(createAccountDto.getPassword())
-                                                .roles(Collections.singletonList(userRole)).build();
+                                                .roles(Collections.singletonList(accountRole)).build();
         return save(newAccount);
     }
 
