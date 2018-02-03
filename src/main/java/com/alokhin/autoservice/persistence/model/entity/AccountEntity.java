@@ -29,7 +29,7 @@ public class AccountEntity {
      */
     @NotNull
     @ManyToMany (fetch = FetchType.EAGER)
-    @JoinTable (name = "role", joinColumns = @JoinColumn (name = "user_id", referencedColumnName = "id"),
+    @JoinTable (name = "account_role", joinColumns = @JoinColumn (name = "user_id", referencedColumnName = "id"),
         inverseJoinColumns = @JoinColumn (name = "role_id", referencedColumnName = "id"))
     private List<RoleEntity> roles;
 
