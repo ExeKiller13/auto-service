@@ -11,4 +11,6 @@ public interface PasswordResetTokenService {
     PasswordResetTokenEntity findByAccountEntity(AccountEntity accountEntity) throws PasswordResetTokenNotFoundException;
 
     PasswordResetTokenEntity save(PasswordResetTokenEntity entity);
+
+    void delete(PasswordResetTokenEntity entity);
 }

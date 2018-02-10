@@ -131,6 +131,7 @@ public class RegistrationServiceImpl implements RegistrationService {
     public AccountEntity updatePasswordByResetToken(String token, String password) throws PasswordResetTokenNotFoundException {
         PasswordResetTokenEntity passwordResetTokenEntity = passwordResetTokenService.findByToken(token);
         AccountEntity accountEntity = passwordResetTokenEntity.getAccountEntity();
+        passwordResetTokenService.delete(passwordResetTokenEntity);
         return accountService.changeAccountPassword(accountEntity, password);
     }
 }

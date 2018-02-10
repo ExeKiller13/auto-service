@@ -40,4 +40,9 @@ public class PasswordResetTokenServiceImpl implements PasswordResetTokenService 
     public PasswordResetTokenEntity save(PasswordResetTokenEntity entity) {
         return passwordResetTokenRepository.save(entity);
     }
+
+    @Override
+    public void delete(PasswordResetTokenEntity entity) {
+        passwordResetTokenRepository.delete(entity);
+    }
 }
