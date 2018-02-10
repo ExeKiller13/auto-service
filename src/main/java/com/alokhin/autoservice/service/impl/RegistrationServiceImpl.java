@@ -4,10 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import com.alokhin.autoservice.domain.VerificationTokenResponse;
 import com.alokhin.autoservice.exception.AccountAlreadyActivatedException;
@@ -18,8 +14,6 @@ import com.alokhin.autoservice.persistence.model.entity.AccountEntity;
 import com.alokhin.autoservice.persistence.model.entity.PasswordResetTokenEntity;
 import com.alokhin.autoservice.persistence.model.entity.VerificationTokenEntity;
 import com.alokhin.autoservice.service.*;
-
-import java.util.Collections;
 
 import static com.alokhin.autoservice.domain.VerificationTokenResponse.*;
 import static com.alokhin.autoservice.util.RegistrationUtil.generateToken;
@@ -91,7 +85,7 @@ public class RegistrationServiceImpl implements RegistrationService {
             throw new AccountNotActivatedException(String.format("Account with username %s isn't activated", accountEntity.getLogin()));
         }
         PasswordResetTokenEntity token = updatePasswordResetToken(accountEntity);
-        String url = path + "/user/changepassword?email=" + accountEntity.getLogin() + "&token=" + token.getToken();
+        String url = path + "/user/reset?email=" + accountEntity.getLogin() + "&token=" + token.getToken();
         mailService.sendMailMessage(from, accountEntity.getLogin(), "Reset Password",
                                     String.format("Please reset password following by link: \r\n %s", url));
     }
@@ -127,12 +121,16 @@ public class RegistrationServiceImpl implements RegistrationService {
             if (passwordResetToken.isExpired().booleanValue()) {
                 return TOKEN_EXPIRED;
             }
-            Authentication auth = new UsernamePasswordAuthenticationToken(accountEntity, null,
-                                                                          Collections.singletonList(new SimpleGrantedAuthority("CHANGE_PASSWORD_PRIVILEGE")));
-            SecurityContextHolder.getContext().setAuthentication(auth);
             return TOKEN_VALID;
         } catch (PasswordResetTokenNotFoundException ignored) {
             return TOKEN_INVALID;
         }
+    }
+
+    @Override
+    public AccountEntity updatePasswordByResetToken(String token, String password) throws PasswordResetTokenNotFoundException {
+        PasswordResetTokenEntity passwordResetTokenEntity = passwordResetTokenService.findByToken(token);
+        AccountEntity accountEntity = passwordResetTokenEntity.getAccountEntity();
+        return accountService.changeAccountPassword(accountEntity, password);
     }
 }

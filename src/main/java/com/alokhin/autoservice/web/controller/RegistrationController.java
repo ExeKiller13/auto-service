@@ -6,15 +6,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.*;
 import com.alokhin.autoservice.domain.VerificationTokenResponse;
 import com.alokhin.autoservice.event.OnRegistrationCompleteEvent;
-import com.alokhin.autoservice.exception.*;
+import com.alokhin.autoservice.exception.AccountAlreadyActivatedException;
+import com.alokhin.autoservice.exception.AccountAlreadyExistException;
+import com.alokhin.autoservice.exception.AccountNotActivatedException;
+import com.alokhin.autoservice.exception.AccountNotFoundException;
 import com.alokhin.autoservice.persistence.model.entity.AccountEntity;
 import com.alokhin.autoservice.service.AccountService;
 import com.alokhin.autoservice.service.EntityConverterService;
@@ -133,25 +134,36 @@ public class RegistrationController {
         }
     }
 
-    @RequestMapping (value = "/user/changePassword", method = RequestMethod.GET)
-    public String showChangePasswordPage(@RequestParam ("email") String email, @RequestParam ("token") String token) {
+    @RequestMapping (value = "/user/reset", method = RequestMethod.GET)
+    public String showChangePasswordPage(Model model, @RequestParam ("email") String email, @RequestParam ("token") String token) {
         try {
             AccountEntity accountEntity = accountService.findByLogin(email);
             VerificationTokenResponse response = registrationService.validatePasswordResetToken(accountEntity, token);
             if (response != TOKEN_VALID) {
-                return "error";
+                throw new Exception("Invalid token");
+            } else {
+                model.addAttribute("resetToken", token);
             }
-            return "updatePassword";
-        } catch (AccountNotFoundException e) {
-            logger.error("Failed to change password. Account not found", e);
+            return "resetPassword";
+        } catch (Exception e) {
+            logger.error("Failed to reset password. Token is invalid or expired", e);
+            model.addAttribute("errorMessage", "Oops!  This is an invalid password reset link.");
             return "error";
         }
     }
 
     @RequestMapping (value = "/user/savePassword", method = RequestMethod.POST)
-    public ResponseEntity<?> updatePassword(@RequestParam ("password") String password) {
-        AccountEntity user = (AccountEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        accountService.changeAccountPassword(user, password);
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<?> updatePassword(@RequestParam ("resetToken") String token, @RequestParam ("password") String password) {
+        try {
+            if (StringUtils.isEmpty(token) || StringUtils.isEmpty(password)) {
+                throw new Exception("Missing token or incorrect password");
+            }
+            registrationService.updatePasswordByResetToken(token, password);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception e) {
+            logger.error("Failed to update password", e);
+            return new ResponseEntity<>(ErrorDto.builder().errorResponse(PROCESSING_ERROR).messageDto(new MessageDto(e.getMessage())),
+                                        HttpStatus.EXPECTATION_FAILED);
+        }
     }
 }

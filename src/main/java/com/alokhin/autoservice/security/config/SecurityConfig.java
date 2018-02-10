@@ -56,7 +56,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
             .authorizeRequests()
-            .antMatchers("/user", "/confirm", "/user/resendToken", "/user/forgotPassword", "/resources/**")
+            .antMatchers("/user", "/confirm", "/user/resendToken", "/user/forgotPassword", "/user/reset", "/resources/**")
             .permitAll()
             .and()
             .sessionManagement()
