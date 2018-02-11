@@ -52,7 +52,7 @@ public class RegistrationController {
         this.entityConverterService = entityConverterService;
     }
 
-    @RequestMapping (value = "/user", method = RequestMethod.POST)
+    @PostMapping ("/user")
     public ResponseEntity<?> createAccount(@RequestBody CreateAccountDto createAccountDto, HttpServletRequest request) {
         try {
             AccountEntity registered = accountService.createAccount(createAccountDto);
@@ -70,7 +70,7 @@ public class RegistrationController {
         }
     }
 
-    @RequestMapping (value = "/confirm", method = RequestMethod.GET)
+    @GetMapping ("/confirm")
     public ResponseEntity<?> confirmRegistration(@RequestParam ("token") String token) {
         try {
             switch (registrationService.validateVerificationToken(token)) {
@@ -89,7 +89,7 @@ public class RegistrationController {
         }
     }
 
-    @RequestMapping (value = "/user/resendToken", method = RequestMethod.POST)
+    @PostMapping ("/user/resendToken")
     public ResponseEntity<?> resendConfirmationToken(HttpServletRequest request, @RequestBody EmailDto email) {
         try {
             AccountEntity registered = accountService.findByLogin(email.getEmail());
@@ -113,7 +113,7 @@ public class RegistrationController {
         }
     }
 
-    @RequestMapping (value = "/user/forgotPassword", method = RequestMethod.POST)
+    @PostMapping ("/user/forgotPassword")
     public ResponseEntity<?> forgotPassword(HttpServletRequest request, @RequestBody EmailDto email) {
         try {
             AccountEntity accountEntity = accountService.findByLogin(email.getEmail());
@@ -134,7 +134,7 @@ public class RegistrationController {
         }
     }
 
-    @RequestMapping (value = "/user/reset", method = RequestMethod.GET)
+    @GetMapping ("/user/reset")
     public String showChangePasswordPage(Model model, @RequestParam ("email") String email, @RequestParam ("token") String token) {
         try {
             AccountEntity accountEntity = accountService.findByLogin(email);
@@ -152,7 +152,7 @@ public class RegistrationController {
         }
     }
 
-    @RequestMapping (value = "/user/savePassword", method = RequestMethod.POST)
+    @PostMapping ("/user/savePassword")
     public ResponseEntity<?> updatePassword(@RequestParam ("resetToken") String token, @RequestParam ("password") String password) {
         try {
             if (StringUtils.isEmpty(token) || StringUtils.isEmpty(password)) {
