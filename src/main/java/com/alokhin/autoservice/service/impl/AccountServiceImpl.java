@@ -1,6 +1,7 @@
 package com.alokhin.autoservice.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.alokhin.autoservice.exception.AccountAlreadyExistException;
 import com.alokhin.autoservice.exception.AccountNotFoundException;
@@ -23,10 +24,13 @@ public class AccountServiceImpl implements AccountService {
 
     private final AccountRepository accountRepository;
 
+    private final PasswordEncoder passwordEncoder;
+
     @Autowired
-    public AccountServiceImpl(AccountRepository accountRepository, RoleService roleService) {
+    public AccountServiceImpl(AccountRepository accountRepository, RoleService roleService, PasswordEncoder passwordEncoder) {
         this.accountRepository = accountRepository;
         this.roleService = roleService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -61,14 +65,14 @@ public class AccountServiceImpl implements AccountService {
             roleService.save(accountRole);
         }
         AccountEntity newAccount = AccountEntity.builder().login(createAccountDto.getEmail())
-                                                .password(createAccountDto.getPassword())
+                                                .password(passwordEncoder.encode(createAccountDto.getPassword()))
                                                 .roles(Collections.singletonList(accountRole)).build();
         return save(newAccount);
     }
 
     @Override
     public AccountEntity changeAccountPassword(AccountEntity entity, String newPassword) {
-        entity.setPassword(newPassword);
+        entity.setPassword(passwordEncoder.encode(newPassword));
         return save(entity);
     }
 }
