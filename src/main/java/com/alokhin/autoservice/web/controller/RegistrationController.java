@@ -30,7 +30,7 @@ import static com.alokhin.autoservice.domain.VerificationTokenResponse.TOKEN_VAL
 import static com.alokhin.autoservice.util.UrlUtil.getContextPath;
 
 @Controller
-@RequestMapping ("/")
+@RequestMapping ("/user")
 public class RegistrationController {
 
     private static final Logger logger = LoggerFactory.getLogger(RegistrationController.class);
@@ -52,7 +52,7 @@ public class RegistrationController {
         this.entityConverterService = entityConverterService;
     }
 
-    @PostMapping ("/user")
+    @PostMapping ("/add")
     public ResponseEntity<?> createAccount(@RequestBody CreateAccountDto createAccountDto, HttpServletRequest request) {
         try {
             AccountEntity registered = accountService.createAccount(createAccountDto);
@@ -89,7 +89,7 @@ public class RegistrationController {
         }
     }
 
-    @PostMapping ("/user/resendToken")
+    @PostMapping ("/resendToken")
     public ResponseEntity<?> resendConfirmationToken(HttpServletRequest request, @RequestBody EmailDto email) {
         try {
             AccountEntity registered = accountService.findByLogin(email.getEmail());
@@ -113,7 +113,7 @@ public class RegistrationController {
         }
     }
 
-    @PostMapping ("/user/forgotPassword")
+    @PostMapping ("/forgotPassword")
     public ResponseEntity<?> forgotPassword(HttpServletRequest request, @RequestBody EmailDto email) {
         try {
             AccountEntity accountEntity = accountService.findByLogin(email.getEmail());
@@ -134,7 +134,7 @@ public class RegistrationController {
         }
     }
 
-    @GetMapping ("/user/reset")
+    @GetMapping ("/reset")
     public String showChangePasswordPage(Model model, @RequestParam ("email") String email, @RequestParam ("token") String token) {
         try {
             AccountEntity accountEntity = accountService.findByLogin(email);
@@ -152,7 +152,7 @@ public class RegistrationController {
         }
     }
 
-    @PostMapping ("/user/savePassword")
+    @PostMapping ("/savePassword")
     public ResponseEntity<?> updatePassword(@RequestParam ("resetToken") String token, @RequestParam ("password") String password) {
         try {
             if (StringUtils.isEmpty(token) || StringUtils.isEmpty(password)) {
