@@ -23,12 +23,13 @@ public interface CarRepository extends CrudRepository<CarEntity, Integer> {
 
     List<CarEntity> findByPriceLessThanEqual(Integer price);
 
+    @Query ("SELECT e FROM CarEntity e WHERE  (?1 IS NULL OR e.year >= ?1) AND (?2 IS NULL OR e.year <= ?2) AND (?3 IS NULL OR e.price >= ?3) AND (?4 IS NULL OR e.price <= ?4)")
     List<CarEntity> findByYearBetweenAndPriceBetween(Integer yearFrom, Integer yearTo, Integer priceFrom, Integer priceTo);
 
     List<CarEntity> findByAccountEntity(AccountEntity accountEntity);
 
     @Query ("SELECT e FROM CarEntity e WHERE e.enabled <> 1")
-    List<CarEntity> findNonActivatedCars();
+    List<CarEntity> findNotActivatedCars();
 
     @Query ("SELECT e FROM CarEntity e WHERE e.enabled = 1")
     List<CarEntity> findActivatedCars();
