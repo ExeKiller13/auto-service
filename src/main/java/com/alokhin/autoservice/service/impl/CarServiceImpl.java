@@ -46,7 +46,7 @@ public class CarServiceImpl implements CarService {
     }
 
     @Override
-    public CarEntity addCar(CarEntity carEntity) {
+    public CarEntity save(CarEntity carEntity) {
         return carRepository.save(carEntity);
     }
 

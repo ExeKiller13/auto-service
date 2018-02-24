@@ -16,7 +16,7 @@ public interface CarService {
 
     List<CarEntity> findCars(Integer yearFrom, Integer yearTo, Integer priceFrom, Integer priceTo);
 
-    CarEntity addCar(CarEntity carEntity);
+    CarEntity save(CarEntity carEntity);
 
     void enableCar(CarEntity carEntity);
 
