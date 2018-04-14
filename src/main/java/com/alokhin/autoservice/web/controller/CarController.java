@@ -1,5 +1,6 @@
 package com.alokhin.autoservice.web.controller;
 
+import org.hibernate.validator.constraints.NotBlank;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import com.alokhin.autoservice.exception.AccountNotFoundException;
+import com.alokhin.autoservice.exception.CarNotFoundException;
 import com.alokhin.autoservice.persistence.model.entity.AccountEntity;
 import com.alokhin.autoservice.persistence.model.entity.CarEntity;
 import com.alokhin.autoservice.persistence.model.entity.RoleEntity;
@@ -77,6 +79,19 @@ public class CarController {
                                      @RequestParam (required = false) Integer priceTo) {
         List<CarEntity> cars = carService.findCars(yearFrom, yearTo, priceFrom, priceTo);
         return new ResponseEntity<>(cars.stream().map(entityConverterService::toDto).collect(Collectors.toList()), HttpStatus.OK);
+    }
+
+    @GetMapping (value = "/activate")
+    public ResponseEntity<?> activateCar(@NotBlank @RequestParam Integer id) {
+        try {
+            CarEntity carEntity = carService.findById(id);
+            carService.enableCar(carEntity);
+        } catch (CarNotFoundException c) {
+            logger.error("Failed to activate car advertisement with id={}, cause: ", id, c);
+            return new ResponseEntity<>(ErrorDto.builder().errorResponse(PROCESSING_ERROR).messageDto(new MessageDto(c.getMessage())).build(),
+                                        HttpStatus.EXPECTATION_FAILED);
+        }
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     private String getAccountFromContext() {
