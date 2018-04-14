@@ -23,6 +23,7 @@ import com.alokhin.autoservice.web.dto.CarDto;
 import com.alokhin.autoservice.web.dto.CreateCarDto;
 import com.alokhin.autoservice.web.dto.ErrorDto;
 import com.alokhin.autoservice.web.dto.MessageDto;
+import com.google.common.collect.Lists;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -74,6 +75,7 @@ public class CarController {
     }
 
     @GetMapping (value = "/cars")
+    @PreAuthorize ("hasAuthority('USER') or hasAuthority('ADMIN')")
     public ResponseEntity<?> getCars(@RequestParam (required = false) Integer yearFrom, @RequestParam (required = false) Integer yearTo,
                                      @RequestParam (required = false) Integer priceFrom,
                                      @RequestParam (required = false) Integer priceTo) {
@@ -82,16 +84,33 @@ public class CarController {
     }
 
     @GetMapping (value = "/activate")
+    @PreAuthorize ("hasAuthority('ADMIN')")
     public ResponseEntity<?> activateCar(@NotBlank @RequestParam Integer id) {
         try {
             CarEntity carEntity = carService.findById(id);
             carService.enableCar(carEntity);
         } catch (CarNotFoundException c) {
-            logger.error("Failed to activate car advertisement with id={}, cause: ", id, c);
+            logger.error("Failed to activate car advertisement with id={}. Car not found.", id, c);
             return new ResponseEntity<>(ErrorDto.builder().errorResponse(PROCESSING_ERROR).messageDto(new MessageDto(c.getMessage())).build(),
                                         HttpStatus.EXPECTATION_FAILED);
         }
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping (value = "/user/cars")
+    @PreAuthorize ("hasAuthority('ADMIN')")
+    public ResponseEntity<?> getUserCars(@NotBlank @RequestParam String login) {
+        List<CarDto> userCars = Lists.newArrayList();
+        try {
+            AccountEntity accountEntity = accountService.findByLogin(login);
+            List<CarEntity> cars = carService.findByAccountEntity(accountEntity);
+            if (cars != null) {
+                userCars = cars.stream().map(entityConverterService::toDto).collect(Collectors.toList());
+            }
+        } catch (AccountNotFoundException a) {
+            logger.error("Failed to get user cars with login={}. Account not exists.", login, a);
+        }
+        return new ResponseEntity<>(userCars, HttpStatus.OK);
     }
 
     private String getAccountFromContext() {
