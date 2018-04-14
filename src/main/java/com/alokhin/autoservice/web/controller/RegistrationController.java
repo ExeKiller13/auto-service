@@ -61,11 +61,11 @@ public class RegistrationController {
             return new ResponseEntity<>(result, HttpStatus.OK);
         } catch (AccountAlreadyExistException a) {
             logger.error("Failed to create new account", a);
-            return new ResponseEntity<>(ErrorDto.builder().errorResponse(PROCESSING_ERROR).messageDto(new MessageDto(a.getMessage())),
+            return new ResponseEntity<>(ErrorDto.builder().errorResponse(PROCESSING_ERROR).messageDto(new MessageDto(a.getMessage())).build(),
                                         HttpStatus.EXPECTATION_FAILED);
         } catch (Exception e) {
             logger.error("Failed to create new account", e);
-            return new ResponseEntity<>(ErrorDto.builder().errorResponse(UNKNOWN_ERROR).messageDto(new MessageDto(e.getMessage())),
+            return new ResponseEntity<>(ErrorDto.builder().errorResponse(UNKNOWN_ERROR).messageDto(new MessageDto(e.getMessage())).build(),
                                         HttpStatus.EXPECTATION_FAILED);
         }
     }
@@ -84,7 +84,7 @@ public class RegistrationController {
             return new ResponseEntity<>(HttpStatus.EXPECTATION_FAILED);
         } catch (AccountAlreadyActivatedException e) {
             logger.error("Failed to confirm account", e);
-            return new ResponseEntity<>(ErrorDto.builder().errorResponse(UNKNOWN_ERROR).messageDto(new MessageDto("Account already activated")),
+            return new ResponseEntity<>(ErrorDto.builder().errorResponse(UNKNOWN_ERROR).messageDto(new MessageDto("Account already activated")).build(),
                                         HttpStatus.EXPECTATION_FAILED);
         }
     }
@@ -100,15 +100,15 @@ public class RegistrationController {
             return new ResponseEntity<>(new MessageDto("Please confirm your account"), HttpStatus.OK);
         } catch (AccountNotFoundException a) {
             logger.error("Failed to resend confirmation token. Account not found", a);
-            return new ResponseEntity<>(ErrorDto.builder().errorResponse(PROCESSING_ERROR).messageDto(new MessageDto(a.getMessage())),
+            return new ResponseEntity<>(ErrorDto.builder().errorResponse(PROCESSING_ERROR).messageDto(new MessageDto(a.getMessage())).build(),
                                         HttpStatus.EXPECTATION_FAILED);
         } catch (AccountAlreadyActivatedException a) {
             logger.error("Failed to resend confirmation token. Account already activated", a);
-            return new ResponseEntity<>(ErrorDto.builder().errorResponse(PROCESSING_ERROR).messageDto(new MessageDto(a.getMessage())),
+            return new ResponseEntity<>(ErrorDto.builder().errorResponse(PROCESSING_ERROR).messageDto(new MessageDto(a.getMessage())).build(),
                                         HttpStatus.EXPECTATION_FAILED);
         } catch (Exception e) {
             logger.error("Failed to resend confirmation token", e);
-            return new ResponseEntity<>(ErrorDto.builder().errorResponse(UNKNOWN_ERROR).messageDto(new MessageDto(e.getMessage())),
+            return new ResponseEntity<>(ErrorDto.builder().errorResponse(UNKNOWN_ERROR).messageDto(new MessageDto(e.getMessage())).build(),
                                         HttpStatus.EXPECTATION_FAILED);
         }
     }
@@ -121,15 +121,15 @@ public class RegistrationController {
             return new ResponseEntity<>(new MessageDto("Please follow by link to change the password"), HttpStatus.OK);
         } catch (AccountNotFoundException a) {
             logger.error("Failed to change password. Account not found", a);
-            return new ResponseEntity<>(ErrorDto.builder().errorResponse(PROCESSING_ERROR).messageDto(new MessageDto(a.getMessage())),
+            return new ResponseEntity<>(ErrorDto.builder().errorResponse(PROCESSING_ERROR).messageDto(new MessageDto(a.getMessage())).build(),
                                         HttpStatus.EXPECTATION_FAILED);
         } catch (AccountNotActivatedException a) {
             logger.error("Failed to change password. Account isn't activated", a);
-            return new ResponseEntity<>(ErrorDto.builder().errorResponse(PROCESSING_ERROR).messageDto(new MessageDto(a.getMessage())),
+            return new ResponseEntity<>(ErrorDto.builder().errorResponse(PROCESSING_ERROR).messageDto(new MessageDto(a.getMessage())).build(),
                                         HttpStatus.EXPECTATION_FAILED);
         } catch (Exception e) {
             logger.error("Failed to change password", e);
-            return new ResponseEntity<>(ErrorDto.builder().errorResponse(UNKNOWN_ERROR).messageDto(new MessageDto(e.getMessage())),
+            return new ResponseEntity<>(ErrorDto.builder().errorResponse(UNKNOWN_ERROR).messageDto(new MessageDto(e.getMessage())).build(),
                                         HttpStatus.EXPECTATION_FAILED);
         }
     }
@@ -162,7 +162,7 @@ public class RegistrationController {
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             logger.error("Failed to update password", e);
-            return new ResponseEntity<>(ErrorDto.builder().errorResponse(PROCESSING_ERROR).messageDto(new MessageDto(e.getMessage())),
+            return new ResponseEntity<>(ErrorDto.builder().errorResponse(PROCESSING_ERROR).messageDto(new MessageDto(e.getMessage())).build(),
                                         HttpStatus.EXPECTATION_FAILED);
         }
     }
