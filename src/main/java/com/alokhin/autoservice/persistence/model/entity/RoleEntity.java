@@ -24,4 +24,8 @@ public class RoleEntity {
     @Tolerate
     public RoleEntity() {
     }
+
+    public Boolean isAdmin() {
+        return "ADMIN".equals(name);
+    }
 }
