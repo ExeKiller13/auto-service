@@ -80,7 +80,7 @@ public class CarController {
                                      @RequestParam (required = false) Integer priceFrom,
                                      @RequestParam (required = false) Integer priceTo) {
         List<CarEntity> cars = carService.findCars(yearFrom, yearTo, priceFrom, priceTo);
-        return new ResponseEntity<>(cars.stream().map(entityConverterService::toDto).collect(Collectors.toList()), HttpStatus.OK);
+        return ResponseEntity.ok(cars.stream().map(entityConverterService::toDto).collect(Collectors.toList()));
     }
 
     @PutMapping (value = "/activate")
@@ -110,7 +110,14 @@ public class CarController {
         } catch (AccountNotFoundException a) {
             logger.error("Failed to get user cars with login={}. Account not exists.", login, a);
         }
-        return new ResponseEntity<>(userCars, HttpStatus.OK);
+        return ResponseEntity.ok(userCars);
+    }
+
+    @GetMapping (value = "/cars/disabled")
+    @PreAuthorize ("hasAuthority('ADMIN')")
+    public ResponseEntity<?> getDisabledCars() {
+        List<CarEntity> cars = carService.findDisabled();
+        return ResponseEntity.ok(cars.stream().map(entityConverterService::toDto).collect(Collectors.toList()));
     }
 
     private String getAccountFromContext() {
