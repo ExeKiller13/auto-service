@@ -17,7 +17,6 @@ import com.alokhin.autoservice.persistence.model.entity.CarEntity;
 import com.alokhin.autoservice.persistence.model.entity.RoleEntity;
 import com.alokhin.autoservice.service.AccountService;
 import com.alokhin.autoservice.service.CarService;
-import com.alokhin.autoservice.service.DataService;
 import com.alokhin.autoservice.service.EntityConverterService;
 import com.alokhin.autoservice.web.dto.CarDto;
 import com.alokhin.autoservice.web.dto.CreateCarDto;
@@ -40,14 +39,11 @@ public class CarController {
 
     private final CarService carService;
 
-    private final DataService dataService;
-
     private final EntityConverterService entityConverterService;
 
     @Autowired
-    public CarController(CarService carService, DataService dataService, AccountService accountService, EntityConverterService entityConverterService) {
+    public CarController(CarService carService, AccountService accountService, EntityConverterService entityConverterService) {
         this.carService = carService;
-        this.dataService = dataService;
         this.accountService = accountService;
         this.entityConverterService = entityConverterService;
     }
