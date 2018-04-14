@@ -140,6 +140,7 @@ public class CarController {
     }
 
     @GetMapping ("/files/{filename:.+}")
+    @PreAuthorize ("hasAuthority('USER') or hasAuthority('ADMIN')")
     @ResponseBody
     public ResponseEntity<Resource> serveFile(@PathVariable String filename) {
 
@@ -148,6 +149,7 @@ public class CarController {
     }
 
     @PostMapping ("/car/{carId}/image")
+    @PreAuthorize ("hasAuthority('USER') or hasAuthority('ADMIN')")
     public ResponseEntity<?> handleFileUpload(@PathVariable Integer carId, @RequestParam ("file") MultipartFile file, HttpServletRequest request) {
         logger.info("Started storage file for car id={}", carId);
         try {
