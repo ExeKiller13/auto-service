@@ -34,7 +34,7 @@ public class RegistrationListener implements ApplicationListener<OnRegistrationC
     private void confirmRegistration(OnRegistrationCompleteEvent event) {
         AccountEntity accountEntity = event.getAccountEntity();
         VerificationTokenEntity verificationTokenEntity = registrationService.updateVerificationToken(accountEntity);
-        String confirmationUrl = event.getAppUrl() + "/confirm?token=" + verificationTokenEntity.getToken();
+        String confirmationUrl = event.getAppUrl() + "/user/confirm?token=" + verificationTokenEntity.getToken();
         mailService.sendMailMessage(from, accountEntity.getLogin(), "Registration confirm",
                                     String.format("Please confirm registration following by link: \r\n %s", confirmationUrl));
     }
