@@ -89,7 +89,7 @@ public class RegistrationController {
         }
     }
 
-    @PostMapping ("/resendToken")
+    @PostMapping ("/token/resend")
     public ResponseEntity<?> resendConfirmationToken(HttpServletRequest request, @RequestBody EmailDto email) {
         try {
             AccountEntity registered = accountService.findByLogin(email.getEmail());
@@ -113,7 +113,7 @@ public class RegistrationController {
         }
     }
 
-    @PostMapping ("/forgotPassword")
+    @PostMapping ("/password/forgot")
     public ResponseEntity<?> forgotPassword(HttpServletRequest request, @RequestBody EmailDto email) {
         try {
             AccountEntity accountEntity = accountService.findByLogin(email.getEmail());
@@ -134,8 +134,8 @@ public class RegistrationController {
         }
     }
 
-    @GetMapping ("/reset")
-    public String showChangePasswordPage(Model model, @RequestParam ("email") String email, @RequestParam ("token") String token) {
+    @GetMapping ("/password/reset")
+    public String changePasswordPage(Model model, @RequestParam ("email") String email, @RequestParam ("token") String token) {
         try {
             AccountEntity accountEntity = accountService.findByLogin(email);
             VerificationTokenResponse response = registrationService.validatePasswordResetToken(accountEntity, token);
@@ -152,7 +152,7 @@ public class RegistrationController {
         }
     }
 
-    @PostMapping ("/savePassword")
+    @PostMapping ("/password/save")
     public ResponseEntity<?> updatePassword(@RequestParam ("resetToken") String token, @RequestParam ("password") String password) {
         try {
             if (StringUtils.isEmpty(token) || StringUtils.isEmpty(password)) {

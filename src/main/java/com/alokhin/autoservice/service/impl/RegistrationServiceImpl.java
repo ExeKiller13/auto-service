@@ -85,7 +85,7 @@ public class RegistrationServiceImpl implements RegistrationService {
             throw new AccountNotActivatedException(String.format("Account with username %s isn't activated", accountEntity.getLogin()));
         }
         PasswordResetTokenEntity token = updatePasswordResetToken(accountEntity);
-        String url = path + "/reset?email=" + accountEntity.getLogin() + "&token=" + token.getToken();
+        String url = path + "/password/reset?email=" + accountEntity.getLogin() + "&token=" + token.getToken();
         mailService.sendMailMessage(from, accountEntity.getLogin(), "Reset Password",
                                     String.format("Please reset password following by link: \r\n %s", url));
     }
