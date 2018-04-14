@@ -8,9 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import com.alokhin.autoservice.exception.AccountNotFoundException;
 import com.alokhin.autoservice.persistence.model.entity.AccountEntity;
 import com.alokhin.autoservice.persistence.model.entity.CarEntity;
@@ -23,6 +21,9 @@ import com.alokhin.autoservice.web.dto.CarDto;
 import com.alokhin.autoservice.web.dto.CreateCarDto;
 import com.alokhin.autoservice.web.dto.ErrorDto;
 import com.alokhin.autoservice.web.dto.MessageDto;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.alokhin.autoservice.domain.ErrorResponse.PROCESSING_ERROR;
 
@@ -68,6 +69,14 @@ public class CarController {
             return new ResponseEntity<>(ErrorDto.builder().errorResponse(PROCESSING_ERROR).messageDto(new MessageDto(a.getMessage())).build(),
                                         HttpStatus.EXPECTATION_FAILED);
         }
+    }
+
+    @GetMapping (value = "/cars")
+    public ResponseEntity<?> getCars(@RequestParam (required = false) Integer yearFrom, @RequestParam (required = false) Integer yearTo,
+                                     @RequestParam (required = false) Integer priceFrom,
+                                     @RequestParam (required = false) Integer priceTo) {
+        List<CarEntity> cars = carService.findCars(yearFrom, yearTo, priceFrom, priceTo);
+        return new ResponseEntity<>(cars.stream().map(entityConverterService::toDto).collect(Collectors.toList()), HttpStatus.OK);
     }
 
     private String getAccountFromContext() {
