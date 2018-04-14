@@ -120,6 +120,20 @@ public class CarController {
         return ResponseEntity.ok(cars.stream().map(entityConverterService::toDto).collect(Collectors.toList()));
     }
 
+    @GetMapping (value = "/delete")
+    @PreAuthorize ("hasAuthority('ADMIN')")
+    public ResponseEntity<?> deleteCar(@NotBlank @RequestParam Integer id) {
+        try {
+            CarEntity entity = carService.findById(id);
+            carService.removeCar(entity);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (CarNotFoundException c) {
+            logger.error("Failed to delete car advertisement with id={}. Car not exists.", id, c);
+            return new ResponseEntity<>(ErrorDto.builder().errorResponse(PROCESSING_ERROR).messageDto(new MessageDto(c.getMessage())).build(),
+                                        HttpStatus.EXPECTATION_FAILED);
+        }
+    }
+
     private String getAccountFromContext() {
         return (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
