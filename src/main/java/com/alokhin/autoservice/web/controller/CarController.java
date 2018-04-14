@@ -116,7 +116,7 @@ public class CarController {
         return ResponseEntity.ok(cars.stream().map(entityConverterService::toDto).collect(Collectors.toList()));
     }
 
-    @GetMapping (value = "/delete")
+    @DeleteMapping (value = "/delete")
     @PreAuthorize ("hasAuthority('ADMIN')")
     public ResponseEntity<?> deleteCar(@NotBlank @RequestParam Integer id) {
         try {
