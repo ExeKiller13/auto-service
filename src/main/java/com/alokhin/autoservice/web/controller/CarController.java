@@ -148,7 +148,7 @@ public class CarController {
         return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename() + "\"").body(file);
     }
 
-    @PostMapping ("/car/{carId}/image")
+    @PostMapping ("/upload/{carId}/image")
     @PreAuthorize ("hasAuthority('USER') or hasAuthority('ADMIN')")
     public ResponseEntity<?> handleFileUpload(@PathVariable Integer carId, @RequestParam ("file") MultipartFile file, HttpServletRequest request) {
         logger.info("Started storage file for car id={}", carId);
