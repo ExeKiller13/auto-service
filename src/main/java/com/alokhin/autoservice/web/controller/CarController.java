@@ -17,7 +17,6 @@ import com.alokhin.autoservice.exception.AccountNotFoundException;
 import com.alokhin.autoservice.exception.CarNotFoundException;
 import com.alokhin.autoservice.persistence.model.entity.AccountEntity;
 import com.alokhin.autoservice.persistence.model.entity.CarEntity;
-import com.alokhin.autoservice.persistence.model.entity.RoleEntity;
 import com.alokhin.autoservice.service.AccountService;
 import com.alokhin.autoservice.service.CarService;
 import com.alokhin.autoservice.service.EntityConverterService;
@@ -62,13 +61,12 @@ public class CarController {
     public ResponseEntity<?> addCar(@RequestBody CreateCarDto createCarDto) {
         try {
             AccountEntity accountEntity = accountService.findByLogin(getAccountFromContext());
-            Boolean isAdmin = accountEntity.getRoles().stream().filter(RoleEntity::isAdmin).findFirst().isPresent();
             CarDto carDto = CarDto.builder().name(createCarDto.getName())
                                   .year(createCarDto.getYear())
                                   .price(createCarDto.getPrice())
                                   .login(accountEntity.getLogin())
                                   .description(createCarDto.getDescription())
-                                  .enabled(isAdmin)
+                                  .enabled(accountEntity.hasAdminRole())
                                   .build();
             CarEntity carEntity = entityConverterService.toEntity(carDto);
             return ResponseEntity.ok(entityConverterService.toDto(carService.save(carEntity)));
@@ -126,15 +124,22 @@ public class CarController {
     }
 
     @DeleteMapping (value = "/delete")
-    @PreAuthorize ("hasAuthority('ADMIN')")
+    @PreAuthorize ("hasAuthority('USER') or hasAuthority('ADMIN')")
     public ResponseEntity<?> deleteCar(@NotBlank @RequestParam Integer id) {
         try {
+            AccountEntity accountEntity = accountService.findByLogin(getAccountFromContext());
             CarEntity entity = carService.findById(id);
-            carService.removeCar(entity);
+            if (accountEntity.hasAdminRole().booleanValue() || accountEntity.equals(entity.getAccountEntity())) {
+                carService.removeCar(entity);
+            }
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (CarNotFoundException c) {
             logger.error("Failed to delete car advertisement with id={}. Car not exists.", id, c);
             return new ResponseEntity<>(ErrorDto.builder().errorResponse(PROCESSING_ERROR).messageDto(new MessageDto(c.getMessage())).build(),
+                                        HttpStatus.EXPECTATION_FAILED);
+        } catch (AccountNotFoundException a) {
+            logger.error("Failed to delete car advertisement with id={}. Account is not exists.", id, a);
+            return new ResponseEntity<>(ErrorDto.builder().errorResponse(PROCESSING_ERROR).messageDto(new MessageDto(a.getMessage())).build(),
                                         HttpStatus.EXPECTATION_FAILED);
         }
     }

@@ -44,4 +44,8 @@ public class AccountEntity {
     public void enable() {
         this.enabled = true;
     }
+
+    public Boolean hasAdminRole() {
+        return roles.stream().filter(RoleEntity::isAdmin).findFirst().isPresent();
+    }
 }
