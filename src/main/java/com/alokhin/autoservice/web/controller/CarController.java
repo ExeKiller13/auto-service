@@ -101,8 +101,24 @@ public class CarController {
     }
 
     @GetMapping (value = "/cars/user")
+    @PreAuthorize ("hasAuthority('USER') or hasAuthority('ADMIN')")
+    public ResponseEntity<?> getUserOwnCars() {
+        List<CarDto> userCars = Lists.newArrayList();
+        try {
+            AccountEntity accountEntity = accountService.findByLogin(getAccountFromContext());
+            List<CarEntity> cars = carService.findByAccountEntity(accountEntity);
+            if (cars != null) {
+                userCars = cars.stream().map(entityConverterService::toDto).collect(Collectors.toList());
+            }
+        } catch (AccountNotFoundException a) {
+            logger.error("Failed to get user cars. Account not exists.", a);
+        }
+        return ResponseEntity.ok(userCars);
+    }
+
+    @GetMapping (value = "/cars/user/{login}")
     @PreAuthorize ("hasAuthority('ADMIN')")
-    public ResponseEntity<?> getUserCars(@NotBlank @RequestParam String login) {
+    public ResponseEntity<?> getUserCars(@PathVariable String login) {
         List<CarDto> userCars = Lists.newArrayList();
         try {
             AccountEntity accountEntity = accountService.findByLogin(login);
