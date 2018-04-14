@@ -70,4 +70,10 @@ public class CarServiceImpl implements CarService {
     public List<CarEntity> findDisabled() {
         return carRepository.findNotActivatedCars();
     }
+
+    @Override
+    public void storeImage(CarEntity carEntity, String imageUrl) {
+        carEntity.setImageUrl(imageUrl);
+        save(carEntity);
+    }
 }

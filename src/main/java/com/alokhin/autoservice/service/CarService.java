@@ -25,4 +25,6 @@ public interface CarService {
     List<CarEntity> findEnabled();
 
     List<CarEntity> findDisabled();
+
+    void storeImage(CarEntity carEntity, String imageUrl);
 }
