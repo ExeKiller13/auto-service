@@ -83,7 +83,7 @@ public class CarController {
         return new ResponseEntity<>(cars.stream().map(entityConverterService::toDto).collect(Collectors.toList()), HttpStatus.OK);
     }
 
-    @GetMapping (value = "/activate")
+    @PutMapping (value = "/activate")
     @PreAuthorize ("hasAuthority('ADMIN')")
     public ResponseEntity<?> activateCar(@NotBlank @RequestParam Integer id) {
         try {
