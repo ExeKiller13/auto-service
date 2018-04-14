@@ -4,12 +4,15 @@ import org.hibernate.validator.constraints.NotBlank;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import com.alokhin.autoservice.exception.AccountNotFoundException;
 import com.alokhin.autoservice.exception.CarNotFoundException;
 import com.alokhin.autoservice.persistence.model.entity.AccountEntity;
@@ -18,16 +21,19 @@ import com.alokhin.autoservice.persistence.model.entity.RoleEntity;
 import com.alokhin.autoservice.service.AccountService;
 import com.alokhin.autoservice.service.CarService;
 import com.alokhin.autoservice.service.EntityConverterService;
+import com.alokhin.autoservice.service.StorageService;
 import com.alokhin.autoservice.web.dto.CarDto;
 import com.alokhin.autoservice.web.dto.CreateCarDto;
 import com.alokhin.autoservice.web.dto.ErrorDto;
 import com.alokhin.autoservice.web.dto.MessageDto;
 import com.google.common.collect.Lists;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.alokhin.autoservice.domain.ErrorResponse.PROCESSING_ERROR;
+import static com.alokhin.autoservice.util.UrlUtil.getBasePath;
 
 @Controller
 @RequestMapping ("/api/car")
@@ -41,11 +47,14 @@ public class CarController {
 
     private final EntityConverterService entityConverterService;
 
+    private final StorageService storageService;
+
     @Autowired
-    public CarController(CarService carService, AccountService accountService, EntityConverterService entityConverterService) {
+    public CarController(CarService carService, AccountService accountService, EntityConverterService entityConverterService, StorageService storageService) {
         this.carService = carService;
         this.accountService = accountService;
         this.entityConverterService = entityConverterService;
+        this.storageService = storageService;
     }
 
     @PostMapping ("/add")
@@ -126,6 +135,30 @@ public class CarController {
         } catch (CarNotFoundException c) {
             logger.error("Failed to delete car advertisement with id={}. Car not exists.", id, c);
             return new ResponseEntity<>(ErrorDto.builder().errorResponse(PROCESSING_ERROR).messageDto(new MessageDto(c.getMessage())).build(),
+                                        HttpStatus.EXPECTATION_FAILED);
+        }
+    }
+
+    @GetMapping ("/files/{filename:.+}")
+    @ResponseBody
+    public ResponseEntity<Resource> serveFile(@PathVariable String filename) {
+
+        Resource file = storageService.loadAsResource(filename);
+        return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename() + "\"").body(file);
+    }
+
+    @PostMapping ("/car/{carId}/image")
+    public ResponseEntity<?> handleFileUpload(@PathVariable Integer carId, @RequestParam ("file") MultipartFile file, HttpServletRequest request) {
+        logger.info("Started storage file for car id={}", carId);
+        try {
+            String imageUrl = getBasePath(request) + "/api/car/files/" + file.getOriginalFilename();
+            carService.storeImage(carService.findById(carId), imageUrl);
+            storageService.store(file);
+            logger.info("Storage file for car id={} successful.", carId);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception e) {
+            logger.error("Failed to upload file.", e);
+            return new ResponseEntity<>(ErrorDto.builder().errorResponse(PROCESSING_ERROR).messageDto(new MessageDto(e.getMessage())).build(),
                                         HttpStatus.EXPECTATION_FAILED);
         }
     }
