@@ -97,7 +97,7 @@ public class CarController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @GetMapping (value = "/user/cars")
+    @GetMapping (value = "/cars/user")
     @PreAuthorize ("hasAuthority('ADMIN')")
     public ResponseEntity<?> getUserCars(@NotBlank @RequestParam String login) {
         List<CarDto> userCars = Lists.newArrayList();
