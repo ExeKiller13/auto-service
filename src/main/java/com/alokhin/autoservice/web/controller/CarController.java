@@ -117,7 +117,7 @@ public class CarController {
     }
 
     @GetMapping (value = "/cars/user/{login}")
-    @PreAuthorize ("hasAuthority('ADMIN')")
+    @PreAuthorize ("hasAuthority('USER') or hasAuthority('ADMIN')")
     public ResponseEntity<?> getUserCars(@PathVariable String login) {
         List<CarDto> userCars = Lists.newArrayList();
         try {
