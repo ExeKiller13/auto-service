@@ -77,7 +77,7 @@ public class CarController {
         }
     }
 
-    @GetMapping (value = "/cars")
+    @GetMapping ("/cars")
     @PreAuthorize ("hasAuthority('USER') or hasAuthority('ADMIN')")
     public ResponseEntity<?> getCars(@RequestParam (required = false) Integer yearFrom, @RequestParam (required = false) Integer yearTo,
                                      @RequestParam (required = false) Integer priceFrom,
@@ -86,7 +86,7 @@ public class CarController {
         return ResponseEntity.ok(cars.stream().map(entityConverterService::toDto).collect(Collectors.toList()));
     }
 
-    @PutMapping (value = "/activate")
+    @PutMapping ("/activate")
     @PreAuthorize ("hasAuthority('ADMIN')")
     public ResponseEntity<?> activateCar(@NotBlank @RequestParam Integer id) {
         try {
@@ -100,7 +100,7 @@ public class CarController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @GetMapping (value = "/cars/user")
+    @GetMapping ("/cars/user")
     @PreAuthorize ("hasAuthority('USER') or hasAuthority('ADMIN')")
     public ResponseEntity<?> getUserOwnCars() {
         List<CarDto> userCars = Lists.newArrayList();
@@ -116,7 +116,7 @@ public class CarController {
         return ResponseEntity.ok(userCars);
     }
 
-    @GetMapping (value = "/cars/user/{login}")
+    @GetMapping ("/cars/user/{login}")
     @PreAuthorize ("hasAuthority('USER') or hasAuthority('ADMIN')")
     public ResponseEntity<?> getUserCars(@PathVariable String login) {
         List<CarDto> userCars = Lists.newArrayList();
@@ -132,14 +132,14 @@ public class CarController {
         return ResponseEntity.ok(userCars);
     }
 
-    @GetMapping (value = "/cars/disabled")
+    @GetMapping ("/cars/disabled")
     @PreAuthorize ("hasAuthority('ADMIN')")
     public ResponseEntity<?> getDisabledCars() {
         List<CarEntity> cars = carService.findDisabled();
         return ResponseEntity.ok(cars.stream().map(entityConverterService::toDto).collect(Collectors.toList()));
     }
 
-    @DeleteMapping (value = "/delete")
+    @DeleteMapping ("/delete")
     @PreAuthorize ("hasAuthority('USER') or hasAuthority('ADMIN')")
     public ResponseEntity<?> deleteCar(@NotBlank @RequestParam Integer id) {
         try {
